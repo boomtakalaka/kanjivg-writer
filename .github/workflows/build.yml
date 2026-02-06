@@ -1,0 +1,13 @@
+name: Build
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    name: Compile & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compile
+        run: npm run build
+      - name: Lint
+        run: npm run lint:nofix
