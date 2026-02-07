@@ -21,17 +21,21 @@
   "author": {
     "name": "Takayuki Ibaraki"
   },
-  "type": "commonjs",
   "scripts": {
     "build": "tsc",
     "lint:fix": "eslint --fix \"src/**/*.ts\"",
-    "lint:nofix": "eslint  \"src/**/*.ts\""
+    "lint:nofix": "eslint  \"src/**/*.ts\"",
+    "convert": "./bin/convert",
+    "integration": "vite serve integration",
+    "dev": "tsc --watch"
   },
   "devDependencies": {
+    "cheerio": "^1.2.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "prettier": "^3.8.1",
-    "typescript-eslint": "^8.54.0"
+    "typescript-eslint": "^8.54.0",
+    "vite": "^7.3.1"
   }
 }

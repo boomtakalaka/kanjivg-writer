@@ -1,0 +1,68 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+const cheerio = require('cheerio');
+
+const kanjiDir = path.resolve(__dirname, '../kanji');
+const files = fs.readdirSync(kanjiDir);
+
+const width = 109;
+const height = 109;
+
+const kanjiMap = {};
+
+for (const file of files) {
+  if (file.includes('-')) {
+    // Skip variants
+    continue;
+  }
+  // Extract strokes in order
+  const svgData = fs.readFileSync(path.resolve(kanjiDir, file));
+  const $ = cheerio.loadBuffer(svgData, {
+    xml: true
+  });
+
+  const kanji = String.fromCodePoint(parseInt(file.replace('.svg', ''), 16));
+
+  const pathElements = $('path').toArray();
+  pathElements.sort((a, b) => a.attribs['id'] < b.attribs['id']);
+  const strokes = pathElements.map(el => el.attribs['d']);
+  kanjiMap[kanji] = {
+    strokes
+  };
+}
+
+const fileContents = {
+  dimensions: {
+    width,
+    height
+  },
+  kanji: kanjiMap
+};
+
+const baseFileName = 'stroke_data';
+const dataFileName = `${baseFileName}.json`;
+const declarationFileName = `${baseFileName}.d.json.ts`;
+
+const typeDeclaration = `type StrokeData = {
+  strokes: string[];
+};
+
+interface StrokeDataFile {
+  dimensions: {
+    width: number;
+    height: number;
+  };
+  kanji: Record<string, StrokeData>;
+}
+
+declare const file: StrokeDataFile;
+export default file;
+`;
+
+const outPath = path.resolve(__dirname, '../src', dataFileName);
+fs.writeFileSync(outPath, JSON.stringify(fileContents));
+
+const declarationOutPath = path.resolve(__dirname, '../src', declarationFileName);
+fs.writeFileSync(declarationOutPath, typeDeclaration);
